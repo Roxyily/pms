@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pms.mapper.PropertyMeterMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pms.entity.PropertyMeter">
+        <id column="id" property="id" />
+        <result column="property_id" property="propertyId" />
+        <result column="type" property="type" />
+        <result column="last_inspection_date" property="lastInspectionDate" />
+        <result column="next_inspection_date" property="nextInspectionDate" />
+        <result column="status" property="status" />
+        <result column="serial_number" property="serialNumber" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, property_id, type, last_inspection_date, next_inspection_date, status, serial_number
+    </sql>
+
+    <resultMap id="PropertyMeterDTOResultMap" type="com.pms.dto.PropertyMeterPropertyDTO">
+        <!-- property_meter 表字段 -->
+        <id property="id" column="id" />
+        <result property="propertyId" column="property_id" />
+        <result property="type" column="type" />
+        <result property="lastInspectionDate" column="last_inspection_date" />
+        <result property="nextInspectionDate" column="next_inspection_date" />
+        <result property="status" column="status" />
+        <result property="serialNumber" column="serial_number" />
+        <!-- property 表字段 -->
+        <result property="propertyName" column="property_name" />
+        <result property="communityId" column="community_id" />
+        <result property="contact" column="contact" />
+        <result property="address" column="address" />
+    </resultMap>
+
+    <select id="selectPropertyMetersWithProperty" resultMap="PropertyMeterDTOResultMap">
+        SELECT pm.id, pm.property_id, pm.type, pm.last_inspection_date, pm.next_inspection_date, pm.status, pm.serial_number,
+        p.name AS property_name
+        FROM property_meter pm
+        INNER JOIN property p ON pm.property_id = p.id
+        WHERE p.community_id = #{params.communityId}
+        <if test="params.type != null">
+            AND pm.type = #{params.type}
+        </if>
+        <if test="params.status != null">
+            AND pm.status = #{params.status}
+        </if>
+        <if test="params.lastInspectionDateStart != null and params.lastInspectionDateEnd != null">
+            AND pm.last_inspection_date BETWEEN #{params.lastInspectionDateStart} AND #{params.lastInspectionDateEnd}
+        </if>
+    </select>
+
+</mapper>

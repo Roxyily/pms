@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pms.mapper.FeeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pms.entity.Fee">
+        <id column="id" property="id" />
+        <result column="resident_id" property="residentId" />
+        <result column="property_id" property="propertyId" />
+        <result column="fee_item_id" property="feeItemId" />
+        <result column="date" property="date" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, resident_id, property_id, fee_item_id, date, status
+    </sql>
+
+    <resultMap id="feeResidentItemDTOResultMap" type="com.pms.dto.FeeResidentItemDTO">
+        <!-- Fee表字段 -->
+        <id property="feeId" column="id" />
+        <result property="residentId" column="resident_id" />
+        <result property="propertyId" column="property_id" />
+        <result property="feeItemId" column="fee_item_id" />
+        <result property="feeDate" column="date" />
+        <result property="status" column="status" />
+
+        <!-- Resident表字段 -->
+        <result property="residentName" column="res_name" />
+        <result property="contact" column="contact" />
+        <result property="communityId" column="community_id" />
+
+        <!-- FeeItem表字段 -->
+        <result property="feeItemName" column="item_name" />
+        <result property="amount" column="amount" />
+    </resultMap>
+    <select id="selectFeesWithResidentsAndItems" resultMap="feeResidentItemDTOResultMap">
+        SELECT fee.id, fee.resident_id, fee.property_id, fee.fee_item_id, fee.date, fee.status,
+        res.name AS res_name, res.contact, res.community_id,
+        item.name AS item_name, item.amount
+        FROM fee
+        INNER JOIN resident res ON fee.resident_id = res.id
+        INNER JOIN fee_item item ON fee.fee_item_id = item.id
+        WHERE res.community_id = #{params.communityId}
+        <if test="params.residentName != null">
+            AND res.name = #{params.residentName}
+        </if>
+        <if test="params.feeItemName != null">
+            AND item.name = #{params.feeItemName}
+        </if>
+        <if test="params.status != null">
+            AND fee.status = #{params.status}
+        </if>
+        <if test="params.startDate != null and params.endDate != null">
+            AND fee.date BETWEEN #{params.startDate} AND #{params.endDate}
+        </if>
+    </select>
+
+</mapper>

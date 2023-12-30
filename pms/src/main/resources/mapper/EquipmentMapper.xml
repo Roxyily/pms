@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pms.mapper.EquipmentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pms.entity.Equipment">
+        <id column="id" property="id" />
+        <result column="property_id" property="propertyId" />
+        <result column="name" property="name" />
+        <result column="status" property="status" />
+        <result column="last_maintenance" property="lastMaintenance" />
+        <result column="serial_number" property="serialNumber" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, property_id, name, status, last_maintenance, serial_number
+    </sql>
+
+    <resultMap id="EquipmentPropertyDTOResultMap" type="com.pms.dto.EquipmentPropertyDTO">
+        <!-- Equipment表字段 -->
+        <id property="equipmentId" column="id" />
+        <result property="propertyId" column="property_id" />
+        <result property="equipmentName" column="name" />
+        <result property="equipmentStatus" column="status" />
+        <result property="lastMaintenance" column="last_maintenance" />
+        <result property="serialNumber" column="serial_number" />
+        <!-- Property表字段 -->
+        <result property="propertyName" column="property_name" />
+        <result property="communityId" column="community_id" />
+        <result property="contact" column="contact" />
+        <result property="address" column="address" />
+    </resultMap>
+
+    <select id="selectEquipmentsWithProperty" resultMap="EquipmentPropertyDTOResultMap">
+        SELECT e.id, e.property_id, e.name, e.status, e.last_maintenance, e.serial_number,
+        p.name AS property_name
+        FROM equipment e
+        INNER JOIN property p ON e.property_id = p.id
+        WHERE p.community_id = #{params.communityId}
+        <if test="params.equipmentName != null">
+            AND e.name = #{params.equipmentName}
+        </if>
+        <if test="params.equipmentStatus != null">
+            AND e.status = #{params.equipmentStatus}
+        </if>
+        <if test="params.lastMaintenanceStartDate != null and params.lastMaintenanceEndDate != null">
+            AND e.last_maintenance BETWEEN #{params.lastMaintenanceStartDate} AND #{params.lastMaintenanceEndDate}
+        </if>
+    </select>
+
+</mapper>

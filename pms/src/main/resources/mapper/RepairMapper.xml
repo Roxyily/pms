@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pms.mapper.RepairMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pms.entity.Repair">
+        <id column="id" property="id" />
+        <result column="resident_id" property="residentId" />
+        <result column="description" property="description" />
+        <result column="status" property="status" />
+        <result column="date" property="date" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, resident_id, description, status, date
+    </sql>
+
+    <resultMap id="repairResidentDTOResultMap" type="com.pms.dto.RepairResidentDTO">
+        <id property="repairId" column="id" />
+        <result property="residentId" column="resident_id" />
+        <result property="description" column="description" />
+        <result property="status" column="status" />
+        <result property="date" column="date" />
+        <result property="name" column="name" />
+        <result property="contact" column="contact" />
+        <result property="communityId" column="community_id" />
+    </resultMap>
+    <select id="selectRepairsWithResidents" resultMap="repairResidentDTOResultMap">
+        SELECT r.id, r.resident_id, r.description, r.status, r.date,
+                res.name, res.contact, res.community_id
+        FROM repair r
+                INNER JOIN resident res ON r.resident_id = res.id
+        WHERE res.community_id = #{params.communityId}
+        <if test="params.name != null">
+            AND res.name = #{params.name}
+        </if>
+        <if test="params.contact != null">
+            AND res.name = #{params.contact}
+        </if>
+        <if test="params.status != null">
+            AND r.status = #{params.status}
+        </if>
+        <if test="params.startDate != null and params.endDate != null">
+            AND r.date BETWEEN #{params.startDate} AND #{params.endDate}
+        </if>
+        <if test="params.keyword != null and params.keyword != ''">
+            AND r.description LIKE CONCAT('%', #{params.keyword}, '%')
+        </if>
+    </select>
+
+</mapper>

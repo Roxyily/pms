@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pms.mapper.ResidentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pms.entity.Resident">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="contact" property="contact" />
+        <result column="community_id" property="communityId" />
+        <result column="unit_number" property="unitNumber" />
+        <result column="room_number" property="roomNumber" />
+        <result column="move_in_date" property="moveInDate" />
+        <result column="move_out_date" property="moveOutDate" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, contact, community_id, unit_number, room_number, move_in_date, move_out_date
+    </sql>
+
+    <select id="pageCC" resultType="com.pms.entity.Resident">
+        select * from resident ${ew.customSqlSegment}
+    </select>
+</mapper>

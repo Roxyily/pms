@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pms.mapper.PrepaymentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.pms.entity.Prepayment">
+        <id column="id" property="id" />
+        <result column="resident_id" property="residentId" />
+        <result column="property_id" property="propertyId" />
+        <result column="amount" property="amount" />
+        <result column="date" property="date" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, resident_id, property_id, amount, date
+    </sql>
+
+    <resultMap id="PrepaymentResidentDTOResultMap" type="com.pms.dto.PrepaymentResidentDTO">
+        <!-- Prepayment表字段 -->
+        <id property="prepaymentId" column="id" />
+        <result property="residentId" column="resident_id" />
+        <result property="propertyId" column="property_id" />
+        <result property="amount" column="amount" />
+        <result property="prepaymentDate" column="date" />
+
+        <!-- Resident表字段 -->
+        <result property="residentName" column="name" />
+        <result property="contact" column="contact" />
+        <result property="communityId" column="community_id" />
+    </resultMap>
+
+    <select id="selectPrepaymentsWithResident" resultMap="PrepaymentResidentDTOResultMap">
+        SELECT p.id, p.resident_id, p.property_id, p.amount, p.date,
+        res.name, res.contact
+        FROM prepayment p
+        INNER JOIN resident res ON p.resident_id = res.id
+        WHERE res.community_id = #{params.communityId}
+        <if test="params.residentName != null and params.residentName != ''">
+            AND res.name = #{params.residentName}
+        </if>
+        <if test="params.contact != null and params.contact != ''">
+            AND res.contact = #{params.contact}
+        </if>
+        <if test="params.amount != null">
+            AND p.amount = #{params.amount}
+        </if>
+        <if test="params.prepaymentDate != null">
+            AND p.date = #{params.prepaymentDate}
+        </if>
+    </select>
+
+
+</mapper>
