@@ -8,9 +8,14 @@ import com.pms.common.QueryPageParam;
 import com.pms.common.Result;
 import com.pms.entity.User;
 import com.pms.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
@@ -36,19 +41,76 @@ public class UserController {
         return userService.list();
     }
 
-    //登录
+    @ApiOperation(value = "登录", notes = "所有用户登陆的接口，会通过cookie在后端存储用户登陆信息")
     @PostMapping("/login")
-    public Result login(@RequestBody User user, HttpSession session) {
-        List list = userService.lambdaQuery()
+    public Result login(@RequestBody User user, HttpServletResponse response) {
+        List<User> list = userService.lambdaQuery()
                 .eq(User::getNo, user.getNo())
                 .eq(User::getPassword, user.getPassword()).list();
         if (list.size() > 0) {
-            // 登录成功，将用户信息存储到session中
-            session.setAttribute("user", list.get(0));
-            return Result.suc(list.get(0));
+            // 登录成功，将用户ID存储到cookie中
+            User loggedInUser = list.get(0);
+            Cookie cookie = new Cookie("userId", String.valueOf(loggedInUser.getId()));
+            cookie.setMaxAge(7 * 24 * 60 * 60); // 设置cookie有效期为7天
+            cookie.setPath("/"); // 设置cookie的路径为网站的根路径
+            response.addCookie(cookie);
+            return Result.suc(loggedInUser);
         } else {
             return Result.fail();
         }
+    }
+
+
+    //注册用户
+    @ApiOperation(value = "注册用户", notes = "小程序端通过该接口注册小区服务平台的账号")
+    @PostMapping("/registerUser")
+    public Result registerUser(@RequestBody User user, Integer residentId) {
+        // 输入验证
+        if (user.getName() == null || user.getPassword() == null) {
+            return Result.fail("username or password is null!");
+        }
+
+        if (user.getNo() == null) {
+            return Result.fail("name is null!");
+        }
+
+        if(user.getCommunityId() == null) {
+            return Result.fail("communityIdData is null!");
+        }
+
+        //分配普通用户权限
+        user.setRoleId(2);
+
+        //绑定用户和住户信息
+        user.setResidentId(residentId);
+
+        boolean save = userService.save(user);
+        return save?Result.suc():Result.fail();
+    }
+
+    //注册管理员
+    @ApiOperation(value = "注册管理员", notes = "PC端通过该接口登录小区物业管理系统，由超级管理员分配管理员账户")
+    @PostMapping("/registerAdministrator")
+    public Result registerAdministrator(@RequestBody User user) {
+        // 输入验证
+        if (user.getName() == null || user.getPassword() == null) {
+            return Result.fail("username or password is null!");
+        }
+
+        if (user.getNo() == null) {
+            return Result.fail("name is null!");
+        }
+
+        if(user.getCommunityId() == null) {
+            return Result.fail("communityIdData is null!");
+        }
+
+        //分配管理员权限
+        user.setRoleId(1);
+
+        boolean save = userService.save(user);
+
+        return save?Result.suc():Result.fail();
     }
 
     //新增
@@ -83,18 +145,11 @@ public class UserController {
 
     //查询（模糊、匹配）
     @PostMapping("/listPage")
-//    public List<User> listPage(@RequestBody HashMap map) {
     public List<User> listPage(@RequestBody QueryPageParam query) {
 
         System.out.println(query);
         HashMap param = query.getParam();
         String name = (String)param.get("name");
-//        System.out.println("name===" + (String)param.get("name"));
-//        System.out.println("no===" + (String)param.get("no"));
-//        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper();
-//        lambdaQueryWrapper.eq(User::getName, user.getName());
-//
-//        return userService.list(lambdaQueryWrapper);
 
         Page<User> page = new Page();
         page.setCurrent(query.getPageNum());
@@ -112,17 +167,10 @@ public class UserController {
     }
 
     @PostMapping("/listPageC")
-//    public List<User> listPage(@RequestBody HashMap map) {
     public List<User> listPageC(@RequestBody QueryPageParam query) {
 
         HashMap param = query.getParam();
         String name = (String)param.get("name");
-//        System.out.println("name===" + (String)param.get("name"));
-//        System.out.println("no===" + (String)param.get("no"));
-//        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper();
-//        lambdaQueryWrapper.eq(User::getName, user.getName());
-//
-//        return userService.list(lambdaQueryWrapper);
 
         Page<User> page = new Page();
         page.setCurrent(query.getPageNum());
@@ -140,17 +188,10 @@ public class UserController {
     }
 
     @PostMapping("/listPageC1")
-//    public List<User> listPage(@RequestBody HashMap map) {
     public Result listPageC1(@RequestBody QueryPageParam query) {
 
         HashMap param = query.getParam();
         String name = (String)param.get("name");
-//        System.out.println("name===" + (String)param.get("name"));
-//        System.out.println("no===" + (String)param.get("no"));
-//        LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper();
-//        lambdaQueryWrapper.eq(User::getName, user.getName());
-//
-//        return userService.list(lambdaQueryWrapper);
 
         Page<User> page = new Page();
         page.setCurrent(query.getPageNum());

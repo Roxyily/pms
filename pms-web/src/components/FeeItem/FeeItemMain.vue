@@ -12,9 +12,14 @@
           <el-button type="warning" plain @click="resetParam">重置</el-button>
         </span>
 
+        <span class="box3">
+          <el-button type="warning" @click="downloadExcel">导出Excel</el-button>
+        </span>
+
+
         <div class="box2">
           <el-button type="warning" plain @click="del">删除</el-button>
-          <!--          <el-button  type="warning" plain style="margin-left: 5px" @click="add">新增</el-button>-->
+          <el-button  type="warning" plain style="margin-left: 5px" @click="add">新增</el-button>
         </div>
       </div>
     </div>
@@ -68,38 +73,16 @@
           center
       >
         <el-form ref="form" :rules="rules" :model="form" label-width="80px">
-          <el-form-item label="姓名" prop="name">
+          <el-form-item label="收费项目" prop="name">
             <el-col :span="20">
               <el-input v-model="form.name"></el-input>
             </el-col>
           </el-form-item>
-          <el-form-item label="联系方式" prop="contact">
+          <el-form-item label="收费金额" prop="amount">
             <el-col :span="20">
-              <el-input v-model="form.contact"></el-input>
+              <el-input v-model="form.amount"></el-input>
             </el-col>
           </el-form-item>
-          <el-form-item label="单元号" prop="unitNumber">
-            <el-col :span="20">
-              <el-input v-model="form.unitNumber"></el-input>
-            </el-col>
-          </el-form-item>
-          <el-form-item label="房间号" prop="roomNumber">
-            <el-col :span="20">
-              <el-input v-model="form.roomNumber"></el-input>
-            </el-col>
-          </el-form-item>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="入住时间">
-                <el-date-picker type="date" placeholder="选择日期" v-model="form.moveInDate" style="width: 100%;"></el-date-picker>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="离开时间">
-                <el-date-picker type="date" placeholder="选择日期" v-model="form.moveOutDate" style="width: 100%;"></el-date-picker>
-              </el-form-item>
-            </el-col>
-          </el-row>
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="centerDialogVisible = false">取 消</el-button>
@@ -178,13 +161,10 @@ export default {
       feeItemName:null,
       centerDialogVisible: false,
       form:{
-        id:'',
-        name:'',
-        contact:'',
-        unitNumber:'',
-        roomNumber:'',
-        moveInDate:'',
-        moveOutDate:''
+        amount: '',
+        id: '',
+        name: '',
+        propertyId: '',
       },
       rules: {
         name: [
@@ -220,6 +200,27 @@ export default {
     ...mapState(['residentList'])
   },
   methods:{
+    //导出Excel表
+    downloadExcel(){
+      this.$axios.post(this.$httpUrl + '/fee-item/exportAll', {
+        param: {
+          feeItemName:this.feeItemName,
+        }
+      }, {
+        responseType: 'arraybuffer'
+      }).then(res => {
+        console.log(res.data);
+        const a = document.createElement ('a')
+        a.href = URL.createObjectURL (new Blob ([ res.data ], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+        a.download = '物业收费项目表.xlsx'
+        a.click ()
+      },).catch(error => {
+        // 捕获错误，并进行相应的处理
+        console.error(error);
+        alert('下载失败');
+      });
+    },
+
     //每一页可显示的记录数更改时run
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
@@ -283,7 +284,7 @@ export default {
 
     //添加记录
     doSave(){
-      this.$axios.post(this.$httpUrl + '/resident/save',this.form).then(res=>{
+      this.$axios.post(this.$httpUrl + '/fee-item/saveFeeItem',this.form).then(res=>{
         console.log(res);
         if(res.data.code===200){
           this.$message({
@@ -299,11 +300,6 @@ export default {
               message: '操作失败！',
               type: 'error'
             });
-          } else if(res.data.data==="Data already exists"){
-            this.$message({
-              message: '房间已存在！',
-              type: 'error'
-            });
           }
         }
       })
@@ -311,10 +307,6 @@ export default {
 
     //修改记录
     doMod(){
-      console.log('@@@@@@@')
-      console.log(this.editForm.amount)
-      console.log(this.editForm.propertyId)
-
       this.$axios.post(this.$httpUrl + '/fee-item/update',
           {
             amount:this.editForm.amount,
@@ -436,5 +428,9 @@ export default {
 
 .el-icon-edit:hover {
   color: #ffd04b;
+}
+
+.box3 {
+  float: right;
 }
 </style>

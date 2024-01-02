@@ -15,6 +15,10 @@
           <el-button type="warning" plain @click="resetParam">重置</el-button>
         </span>
 
+        <span class="box3">
+          <el-button type="warning" @click="downloadExcel">导出Excel</el-button>
+        </span>
+
         <div class="box2">
           <el-button type="warning" plain @click="del">删除</el-button>
           <el-button  type="warning" plain style="margin-left: 5px" @click="add">新增</el-button>
@@ -259,6 +263,29 @@ export default {
     ...mapState(['residentList'])
   },
   methods:{
+    //导出Excel表
+    downloadExcel(){
+      this.$axios.post(this.$httpUrl + '/resident/exportAll', {
+        param: {
+          name: this.name,
+          unitNumber: this.unitNumber,
+          roomNumber: this.roomNumber,
+        }
+      }, {
+        responseType: 'arraybuffer'
+      }).then(res => {
+        console.log(res.data);
+        const a = document.createElement ('a')
+        a.href = URL.createObjectURL (new Blob ([ res.data ], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }))
+        a.download = '住户表.xlsx'
+        a.click ()
+      },).catch(error => {
+        // 捕获错误，并进行相应的处理
+        console.error(error);
+        alert('下载失败');
+      });
+    },
+
     //每一页可显示的记录数更改时run
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`);
@@ -429,6 +456,7 @@ export default {
       },)
     },
   },
+
   beforeMount() {
     this.loadPost();
   }
@@ -468,5 +496,9 @@ export default {
 
  .el-icon-edit:hover {
    color: #ffd04b;
+ }
+
+ .box3{
+   float: right;
  }
 </style>

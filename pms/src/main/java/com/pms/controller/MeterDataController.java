@@ -33,7 +33,7 @@ public class MeterDataController {
     @Autowired
     private MeterDataService meterDataService;
 
-    @ApiOperation(value = "查询该仪表的所有数值", notes = "")
+    @ApiOperation(value = "查询仪表数值", notes = "根据提供的仪表ID查询该仪表的所有数值")
     @GetMapping("/listByMeterId/{id}")
     public Result listByMeterId(@PathVariable Integer id) {
         if (id == null) {
@@ -45,5 +45,24 @@ public class MeterDataController {
 
         List<MeterData> results = meterDataService.list(lambdaQueryWrapper);
         return results.isEmpty()?Result.fail():Result.suc(results, (long) results.size());
+    }
+
+    @ApiOperation(value = "新增仪表数据", notes = "传入单个仪表数据对象并保存到数据库中")
+    @PostMapping("/addMeterData")
+    public Result addMeterData(@RequestBody MeterData meterData) {
+        // 检查meterData的attribute是否为null
+        if (meterData.getAttribute() == null) {
+            return Result.fail("Attribute cannot be null");
+        }
+
+        // 检查meterData的value是否为null
+        if (meterData.getValue() == null) {
+            return Result.fail("Value cannot be null");
+        }
+
+        // 保存meterData对象
+        boolean save = meterDataService.save(meterData);
+
+        return save ? Result.suc() : Result.fail();
     }
 }

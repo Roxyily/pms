@@ -38,7 +38,7 @@
           login() {
             let user = {
               no: this.name,
-              password: this.password
+              password: this.password,
             };
             let self = this;
             this.$axios.post('http://localhost:8090/user/login', user)

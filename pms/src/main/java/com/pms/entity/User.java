@@ -56,5 +56,6 @@ public class User implements Serializable {
     @TableField("isValid")
     private String isvalid;
 
-
+    @ApiModelProperty(value = "住户主键")
+    private Integer residentId;
 }
