@@ -35,7 +35,7 @@ export default {
       console.log('to_user')
     },
     logout(){
-      console.log('logout')
+      this.$router.push("/").catch(err => err);
     },
     collapse(){
       this.$emit('daCollapse')

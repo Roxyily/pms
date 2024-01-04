@@ -75,7 +75,7 @@ import Chart_peopNum from './Chart_PeopleNumber';
   
   <style scoped>
   .main {
-    height: 750px;
+    height: 700px;
     overflow: scroll;
   }
 
