@@ -46,14 +46,14 @@
     </el-submenu>
 
 
-    <el-submenu index="/Three">
-        <template slot="title">
-          <i class="el-icon-s-data"></i>
-          <span>数据报表与统计</span>
-        </template>
-          <el-menu-item index="1-1">选项1</el-menu-item>
-          <el-menu-item index="1-2">选项2</el-menu-item>
-    </el-submenu>
+<!--    <el-submenu index="/Three">-->
+<!--        <template slot="title">-->
+<!--          <i class="el-icon-s-data"></i>-->
+<!--          <span>数据报表与统计</span>-->
+<!--        </template>-->
+<!--          <el-menu-item index="1-1">选项1</el-menu-item>-->
+<!--          <el-menu-item index="1-2">选项2</el-menu-item>-->
+<!--    </el-submenu>-->
 
   </el-menu>
 
